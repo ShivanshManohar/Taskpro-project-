@@ -1,26 +1,15 @@
-import Task from '../models/Task.js';
-
-export const getTasks = async (req, res) => {
-  const tasks = await Task.find();
-  res.json(tasks);
-};
+import Task from "../models/taskModel.js";
 
 export const createTask = async (req, res) => {
-  const { title } = req.body;
-  const newTask = new Task({ title });
-  await newTask.save();
-  res.status(201).json(newTask);
-};
+  try {
+    const { text } = req.body;
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ error: "Task text is required" });
+    }
 
-export const deleteTask = async (req, res) => {
-  const { id } = req.params;
-  await Task.findByIdAndDelete(id);
-  res.json({ message: 'Task deleted' });
-};
-
-export const toggleTask = async (req, res) => {
-  const task = await Task.findById(req.params.id);
-  task.completed = !task.completed;
-  await task.save();
-  res.json(task);
+    const task = await Task.create({ text, completed: false });
+    res.status(201).json(task);  // ✅ must return the created task
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create task" });
+  }
 };
